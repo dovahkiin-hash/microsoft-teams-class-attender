@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
@@ -146,20 +147,10 @@ def joinclass(class_name,start_time,end_time):
 
 
 	try:
-		joinbtn = driver.find_element_by_class_name("ts-calling-join-button")
+		joinbtn= WebDriverWait(driver, 900).until(EC.presence_of_element_located((By.CLASS_NAME, 'ts-calling-join-button')))
 		joinbtn.click()
-
-	except:
-		#join button not found
-		#refresh every minute until found
-		k = 1
-		while(k<=15):
-			print("Join button not found, trying again")
-			time.sleep(60)
-			driver.refresh()
-			joinclass(class_name,start_time,end_time)
-			# schedule.every(1).minutes.do(joinclass,class_name,start_time,end_time)
-			k+=1
+		
+	except TimeoutException:
 		print("Seems like there is no class today.")
 		discord_webhook.send_msg(class_name=class_name,status="noclass",start_time=start_time,end_time=end_time)
 
